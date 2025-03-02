@@ -1,0 +1,20 @@
+<odoo>
+    <!-- Groupe : Visiteur -->
+    <record id="group_dam_visitor" model="res.groups">
+        <field name="name">Visitor</field>
+        <field name="category_id" ref="base.module_category_tools"/>
+    </record>
+
+    <!-- Groupe : Éditeur -->
+    <record id="group_dam_editor" model="res.groups">
+        <field name="name">Editor</field>
+        <field name="category_id" ref="base.module_category_tools"/>
+    </record>
+
+    <!-- Groupe : Administrateur -->
+    <record id="group_dam_admin" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="category_id" ref="base.module_category_tools"/>
+        <field name="implied_ids" eval="[(4, ref('group_dam_editor'))]"/>
+    </record>
+</odoo>
