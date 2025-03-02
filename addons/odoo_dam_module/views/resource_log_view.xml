@@ -1,0 +1,38 @@
+<odoo>
+    <data>
+        <!-- Vue Liste -->
+        <record id="view_dam_resource_log_tree" model="ir.ui.view">
+            <field name="name">dam.resource.log.tree</field>
+            <field name="model">dam.resource.log</field>
+            <field name="arch" type="xml">
+                <tree string="Resource Logs" create="false" delete="false">
+                    <field name="timestamp"/>
+                    <field name="user_id"/>
+                    <field name="resource_id"/>
+                    <field name="action_type"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action -->
+        <record id="action_dam_resource_log" model="ir.actions.act_window">
+            <field name="name">Resource Logs</field>
+            <field name="res_model">dam.resource.log</field>
+            <field name="view_mode">tree</field>
+            <field name="help" type="html">
+                <p>
+                    This view allows administrators to track actions performed on resources.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu -->
+        <menuitem id="menu_dam_resource_log"
+                  name="Resource Logs"
+                  parent="menu_dam_root"
+                  action="action_dam_resource_log"
+                  sequence="20"
+                  groups="odoo_dam_module.group_dam_admin"/>
+    </data>
+</odoo>
+

@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dam_resource_visitor,Visitor access for DAM Resource,odoo_dam_module.model_dam_resource,odoo_dam_module.group_dam_visitor,1,0,0,0
+access_dam_resource_editor,Editor access for DAM Resource,odoo_dam_module.model_dam_resource,odoo_dam_module.group_dam_editor,1,1,1,0
+access_dam_resource_admin,Admin access for DAM Resource,odoo_dam_module.model_dam_resource,odoo_dam_module.group_dam_admin,1,1,1,1
+access_dam_resource_log,access_dam_resource_log,odoo_dam_module.model_dam_resource_log,base.group_user,1,1,1,1

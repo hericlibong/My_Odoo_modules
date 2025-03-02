@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action pour ouvrir la vue liste -->
+    <record id="action_dam_resource" model="ir.actions.act_window">
+        <field name="name">Resources</field>
+        <field name="res_model">dam.resource</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>
+                Manage your digital resources efficiently here. Click on a resource to edit, or use the Create button to add a new one.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Principal avec icône -->
+    <menuitem 
+        name="Digital Asset Management" 
+        id="menu_dam_root" 
+        web_icon="odoo_dam_module,static/description/icon.png" 
+        sequence="10" 
+        groups="odoo_dam_module.group_dam_visitor,odoo_dam_module.group_dam_editor,odoo_dam_module.group_dam_admin"
+    />
+
+    <!-- Sous-menu Ressources -->
+    <menuitem 
+        id="menu_dam_resource" 
+        name="Resources" 
+        parent="menu_dam_root" 
+        sequence="10" 
+        action="action_dam_resource"
+        groups="odoo_dam_module.group_dam_visitor,odoo_dam_module.group_dam_editor,odoo_dam_module.group_dam_admin"
+    />
+</odoo>

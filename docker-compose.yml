@@ -1,0 +1,33 @@
+# C:\Users\heric\odoo-dev-projects\docker-compose.yml
+services:
+  odoo:
+    image: odoo:16
+    depends_on:
+      - db
+    restart: always
+    # Cette commande permet de recharger automatiquement les modifications de code
+    # en mode développement, ce qui facilite le développement en temps réel.
+    command: --dev=reload
+    ports:
+      - "8069:8069"
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+      - ./config:/etc/odoo
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+      - POSTGRES_DB=postgres
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_DB=postgres
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+
+volumes:
+  odoo-web-data:
+  odoo-db-data:
