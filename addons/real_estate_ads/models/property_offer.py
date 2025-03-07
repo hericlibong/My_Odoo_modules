@@ -55,3 +55,13 @@ class PropertyOffer(models.Model):
             if rec.deadline and rec.deadline < fields.Date.today():
                 raise ValidationError("Deadline can not be before creation date")
         return super(PropertyOffer, self).write(vals)
+    
+    def write(self, vals):
+        print(self.env.cr)
+        print(self.env.uid)
+        print(self.env.context)
+        res_partner_ids = self.env['res.partner'].search([
+            ('is_company', '=', True),
+        ]).filtered(lambda r: r.phone == '123456789')
+        return super(PropertyOffer, self).write(vals)
+    
