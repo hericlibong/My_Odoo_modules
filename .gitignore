@@ -1,0 +1,16 @@
+# Ignorer les fichiers compilés Python
+__pycache__/
+*.pyc
+
+# Ignorer les bases de données et fichiers temporaires
+*.sqlite3
+*.log
+*.csv
+*.bak
+backup*.sql
+
+# Ignorer les fichiers spécifiques à Odoo
+addons/*/__pycache__/
+addons/*/*.pyc
+odoo-data/
+config/
