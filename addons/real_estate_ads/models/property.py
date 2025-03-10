@@ -6,6 +6,15 @@ class Property(models.Model):
     _description = 'Real Estate Property'
 
     name = fields.Char(string='Name', required=True)
+
+    state = fields.Selection([
+        ('new', 'New'),
+        ('received', 'Offer Received'),
+        ('accepted', 'Offer Accepted'),
+        ('sold', 'Sold'),
+        ('cancel', 'Cancelled'),
+    ], default='new', string='Status')
+
     tag_ids = fields.Many2many('estate.property.tag', string='Property Tags')
     type_id = fields.Many2one('estate.property.type', string='Property Type')
     description = fields.Text(string='Description')
@@ -30,6 +39,33 @@ class Property(models.Model):
     sales_id = fields.Many2one('res.users', string='Salesman')
     buyer_id = fields.Many2one('res.partner', string='Buyer', domain=[('is_company', '=', True)])
     phone = fields.Char(string='Phone', related='buyer_id.phone')
+
+    def action_sold(self):
+        for rec in self:
+            rec.state = 'sold'
+    
+    
+    def action_cancel(self):
+        for rec in self:
+            rec.state = 'cancel'
+
+    @api.depends('offer_ids')
+    def _compute_offer_count(self):
+        for rec in self:
+            rec.offer_count = len(rec.offer_ids)
+    
+    offer_count = fields.Integer(string='Offer Count', compute='_compute_offer_count')
+
+    def action_property_view_offers(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': f"{self.name} - Offers",
+            'domain': [('property_id', '=', self.id)],
+            'view_mode': 'tree,form',
+            'res_model': 'estate.property.offer'
+         
+        }
+    
 
     # 1 depends method
     @api.depends('living_area', 'garden_area')

@@ -8,6 +8,15 @@ class PropertyOffer(models.Model):
     _name = 'estate.property.offer'
     _description = 'Estate Property Offers'
 
+    @api.depends('property_id', 'partner_id')
+    def _compute_name(self):
+        for rec in self:
+            if rec.property_id and rec.partner_id:
+                rec.name = f" {rec.property_id.name} | Partner : {rec.partner_id.name}"
+            else:
+                rec.name = False
+
+    name = fields.Char(string="Description", compute='_compute_name')
     price = fields.Float(string="Price")
     status = fields.Selection([
         ('accepted', 'Accepted'),
@@ -50,18 +59,6 @@ class PropertyOffer(models.Model):
             if rec.deadline <= rec.creation_date:
                 raise models.ValidationError("Deadline can not be before creation date")
 
-    def write(self, vals):
-        for rec in self:
-            if rec.deadline and rec.deadline < fields.Date.today():
-                raise ValidationError("Deadline can not be before creation date")
-        return super(PropertyOffer, self).write(vals)
+
     
-    def write(self, vals):
-        print(self.env.cr)
-        print(self.env.uid)
-        print(self.env.context)
-        res_partner_ids = self.env['res.partner'].search([
-            ('is_company', '=', True),
-        ]).filtered(lambda r: r.phone == '123456789')
-        return super(PropertyOffer, self).write(vals)
-    
+  

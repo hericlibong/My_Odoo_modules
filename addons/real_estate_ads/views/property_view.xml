@@ -2,6 +2,13 @@
 <odoo>
     <data>
 
+    <record id="action_property_view_offers" model="ir.actions.act_window">
+            <field name="name">Property</field>
+            <field name="res_model">estate.property.offer</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('property_id', '=', active_id)]</field>
+        </record>
+
         <record id="estate_property_tree_view" model="ir.ui.view">
             <field name="name">estate.property.tree</field>
             <field name="model">estate.property</field>
@@ -23,11 +30,24 @@
             <field name="model">estate.property</field>
             <field name="arch" type="xml">
                 <form>
+                <header>
+                <button name="action_sold" string="Sold" type="object" class="btn btn-primary"/>
+                <button name="action_cancel" string="Cancel" type="object" class="btn btn-danger"/>
+                <field name="state" widget="statusbar"/>
+                </header>
                     <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    <button class = "oe_stat_button" name="%(real_estate_ads.action_property_view_offers)d" type="action">
+                    <field name="offer_count" string="Offers" widget="statinfo"/>
+                    </button>
+                    </div>
+
+
                         <group>
                             <field name="name"/>
                             <field name="tag_ids" widget="many2many_tags"/>
                             <group>
+                                <field name="state"/>
                                 <field name="type_id"/>
                                 <field name="postcode"/>
                                 <field name="date_availability"/>
@@ -40,6 +60,7 @@
                             <notebook>
                                 <page string="Description">
                                 <group>
+                                    
                                     <field name="description"/>
                                     <field name="bedrooms"/>
                                     <field name="living_area"/>
