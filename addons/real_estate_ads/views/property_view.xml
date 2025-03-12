@@ -20,7 +20,8 @@
                     <field name="date_availability"/>
                     <field name="expected_price"/>
                     <field name="best_offer"/>
-                    <field name="selling_price"/>
+                    <field name="state" widget="badge"/>
+                    <field name="selling_price" attrs="{'readonly':[('state', '=', 'sold')]}"/>
                 </tree>
             </field>
         </record>
@@ -44,18 +45,18 @@
 
 
                         <group>
-                            <field name="name"/>
+                            <field name="name" widget="char_emojis"/>
                             <field name="tag_ids" widget="many2many_tags"/>
                             <group>
-                                <field name="state"/>
+                                <field name="state" widget="badge"/>
                                 <field name="type_id"/>
-                                <field name="postcode"/>
+                                <field name="postcode" password="True"/>
                                 <field name="date_availability"/>
                             </group>
                             <group>
-                                <field name="expected_price"/>
+                                <field name="expected_price" attrs="{'readonly': [('state', 'in', ['accepted', 'sold'])]}"/>
                                 <field name="best_offer"/>
-                                <field name="selling_price"/>
+                                <field name="selling_price" attrs="{'readonly':[('state', '=', 'sold')]}"/>
                             </group>
                             <notebook>
                                 <page string="Description">
@@ -65,30 +66,35 @@
                                     <field name="bedrooms"/>
                                     <field name="living_area"/>
                                     <field name="facades"/>
-                                    <field name="garage"/>
+                                    <field name="garage" widget= "boolean_toggle"/>
                                     <field name="garden"/>
-                                    <field name="garden_area"/>
-                                    <field name="garden_orientation"/>
+                                    <field name="garden_area" attrs="{'invisible': [('garden', '=', False)]}"/>
+                                    <field name="garden_orientation" attrs="{'invisible': [('garden', '=', False)]}" widget="selection_badge"/>
                                     <field name="total_area"/>
                                 </group>
                                 </page>
                                 <page string="Offers">
                                     <field name="offer_ids">
-                                        <tree editable="bottom">
+                                        <tree editable="bottom" decoration-success="status == 'accepted'" decoration-danger="status == 'refused'">
                                             <field name="price"/>
                                             <field name="partner_id"/>
                                             <field name="creation_date"/>                                           
                                             <field name="validity"/>
-                                            <field name="deadline"/>
-                                            <field name="status" nolabel="1"/>
+                                            <field name="deadline" widget="remaining_days"/>
+                                            <field name="status" readonly="1"/>
+    
+                                            
                                         </tree>
                                     </field>
                                 </page>
-                                <page string="other infos">
+                                <page string="other info">
                                 <group>
-                                <field name="sales_id"/>
-                                <field name="buyer_id"/>
-                                <field name="phone"/>
+                                <field name="sales_id" widget="many2one_avatar_user"/>
+                                <field name="buyer_id" widget="many2one_avatar"/>                           
+                                <field name="phone" widget="phone"/>
+                                <field name="email" widget="email"/>
+                               
+                                
                                 </group>
 
                                 </page>

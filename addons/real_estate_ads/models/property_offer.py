@@ -19,8 +19,11 @@ class PropertyOffer(models.Model):
     name = fields.Char(string="Description", compute='_compute_name')
     price = fields.Float(string="Price")
     status = fields.Selection([
-        ('accepted', 'Accepted'),
-        ('refused', 'Refused')], string="Status")
+        ('received', 'Offer Received'),
+        ('accepted', 'Offer Accepted'),
+        ('sold', 'Sold'),
+        ('cancel', 'Cancelled')
+        ], string="Status")
     partner_id = fields.Many2one('res.partner', string="Customer")
     property_id = fields.Many2one('estate.property', string="Property")
     validity = fields.Integer(string="Validity")
