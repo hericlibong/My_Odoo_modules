@@ -55,7 +55,13 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar"/>
+                    <field name="state" widget="statusbar" statusbar_visible="received,qualified,proposed,confirmed,in_progress,closed,invoiced" statusbar_clickable="false"/>
+                    <button name="action_qualify" string="Qualifier" type="object" states="received" class="btn-primary"/>
+                    <button name="action_propose" string="Proposer" type="object" states="qualified" class="btn-primary"/>
+                    <button name="action_confirm" string="Confirmer" type="object" states="proposed" class="btn-primary"/>
+                    <button name="action_start" string="Démarrer" type="object" states="confirmed" class="btn-primary"/>
+                    <button name="action_close" string="Clôturer" type="object" states="in_progress" class="btn-primary"/>
+                    <button name="action_invoice_mark" string="Marquer facturée" type="object" states="closed" class="btn-primary"/>
                 </header>
                 <sheet>
                     <group>

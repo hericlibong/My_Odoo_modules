@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 
 class OrneInterimMission(models.Model):
     _name = 'orne_interim.mission'
@@ -20,7 +21,7 @@ class OrneInterimMission(models.Model):
     
     # Détails de la demande
     expected_workers = fields.Integer(string='Nombre de personnes', required=True, default=1)
-    hourly_rate = fields.Float(string='Taux horaire', digits='Product Price', help='Taux horaire facturé au client')
+    hourly_rate = fields.Float(string='Taux horaire', digits=(16, 2), help='Taux horaire facturé au client')
     description = fields.Text(string='Description des besoins')
     
     # Workflow
@@ -34,9 +35,6 @@ class OrneInterimMission(models.Model):
         ('invoiced', 'Facturée')
     ], string='État', default='received', required=True)
     
-    # Détails de la demande
-    hourly_rate = fields.Float(string='Taux horaire', digits=(16, 2), help='Taux horaire facturé au client')
-    
     # Champs calculés
     duration_days = fields.Integer(string='Durée (jours)', compute='_compute_duration', store=True)
     
@@ -44,8 +42,7 @@ class OrneInterimMission(models.Model):
     def _compute_duration(self):
         for record in self:
             if record.date_start and record.date_end:
-                delta = fields.Date.from_string(record.date_end) - fields.Date.from_string(record.date_start)
-                record.duration_days = delta.days + 1  # Inclusif
+                record.duration_days = (record.date_end - record.date_start).days + 1  # Inclusif
             else:
                 record.duration_days = 0
     
@@ -56,3 +53,48 @@ class OrneInterimMission(models.Model):
             if vals.get('name', '/') == '/':
                 vals['name'] = self.env['ir.sequence'].next_by_code('orne.interim.mission') or '/'
         return super(OrneInterimMission, self).create(vals_list)
+
+    # Méthodes de transition du workflow
+    def action_qualify(self):
+        for rec in self:
+            if rec.state != 'received':
+                raise UserError("Seules les missions à l'état 'Reçue' peuvent être qualifiées.")
+            if not rec.partner_id:
+                raise UserError("Le client est obligatoire pour qualifier la mission.")
+            if not rec.date_start or not rec.date_end:
+                raise UserError("Les dates de début et de fin sont obligatoires.")
+            if rec.date_end < rec.date_start:
+                raise UserError("La date de fin doit être postérieure à la date de début.")
+            if rec.expected_workers < 1:
+                raise UserError("Le nombre de personnes doit être au moins 1.")
+            rec.state = 'qualified'
+
+    def action_propose(self):
+        for rec in self:
+            if rec.state != 'qualified':
+                raise UserError("Seules les missions à l'état 'Qualifiée' peuvent être proposées.")
+            rec.state = 'proposed'
+
+    def action_confirm(self):
+        for rec in self:
+            if rec.state != 'proposed':
+                raise UserError("Seules les missions à l'état 'Proposée' peuvent être confirmées.")
+            rec.state = 'confirmed'
+
+    def action_start(self):
+        for rec in self:
+            if rec.state != 'confirmed':
+                raise UserError("Seules les missions à l'état 'Confirmée' peuvent être démarrées.")
+            rec.state = 'in_progress'
+
+    def action_close(self):
+        for rec in self:
+            if rec.state != 'in_progress':
+                raise UserError("Seules les missions à l'état 'En cours' peuvent être clôturées.")
+            rec.state = 'closed'
+
+    def action_invoice_mark(self):
+        for rec in self:
+            if rec.state != 'closed':
+                raise UserError("Seules les missions à l'état 'Clôturée' peuvent être marquées comme facturées.")
+            rec.state = 'invoiced'
