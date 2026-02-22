@@ -49,9 +49,10 @@ class OrneInterimMission(models.Model):
             else:
                 record.duration_days = 0
     
-    # Séquence automatique
-    @api.model
-    def create(self, vals):
-        if vals.get('name', '/') == '/':
-            vals['name'] = self.env['ir.sequence'].next_by_code('orne.interim.mission') or '/'
-        return super(OrneInterimMission, self).create(vals)
+    # Séquence automatique (compatible batch)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name', '/') == '/':
+                vals['name'] = self.env['ir.sequence'].next_by_code('orne.interim.mission') or '/'
+        return super(OrneInterimMission, self).create(vals_list)

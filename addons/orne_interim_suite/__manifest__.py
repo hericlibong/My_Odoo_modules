@@ -8,8 +8,9 @@
     'category': 'Human Resources', 
     'depends': ['base'],  # Dépendances minimales pour le MVP
     'data': [
+        'security/ir.model.access.csv',
         'data/sequences.xml',
-    ],  # Séquence pour la génération automatique des références
+    ],  # Accès + séquence pour la génération automatique des références
     'demo': [],  # Pas de données demo pour cette phase
     'installable': True, 
     'application': True, 

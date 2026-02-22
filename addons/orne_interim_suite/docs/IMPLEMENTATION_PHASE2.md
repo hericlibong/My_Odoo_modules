@@ -17,8 +17,9 @@
     'category': 'Human Resources', 
     'depends': ['base'],  # Dépendances minimales pour le MVP
     'data': [
+        'security/ir.model.access.csv',
         'data/sequences.xml',
-    ],  # Séquence pour la génération automatique des références
+    ],  # Accès + séquence pour la génération automatique des références
     'demo': [],  # Pas de données demo pour cette phase
     'installable': True, 
     'application': True, 
@@ -29,6 +30,7 @@
 
 **Points clés** :
 - Dépendance minimale (`base` uniquement) pour respecter les contraintes
+- Ajout de `security/ir.model.access.csv` pour les permissions
 - Ajout de `data/sequences.xml` pour la séquence de référence
 - Pas de dépendances à `crm`, `sale` ou `account` à ce stade
 - Module marqué comme `application` pour apparition dans le menu Apps
@@ -90,12 +92,13 @@ class OrneInterimMission(models.Model):
             else:
                 record.duration_days = 0
     
-    # Séquence automatique
-    @api.model
-    def create(self, vals):
-        if vals.get('name', '/') == '/':
-            vals['name'] = self.env['ir.sequence'].next_by_code('orne.interim.mission') or '/'
-        return super(OrneInterimMission, self).create(vals)
+    # Séquence automatique (compatible batch)
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name', '/') == '/':
+                vals['name'] = self.env['ir.sequence'].next_by_code('orne.interim.mission') or '/'
+        return super(OrneInterimMission, self).create(vals_list)
 ```
 
 **Points clés** :
@@ -110,6 +113,7 @@ class OrneInterimMission(models.Model):
 - **Calculs** :
   - `duration_days` : Durée automatique en jours
   - Génération automatique de référence via séquence `orne.interim.mission`
+- **Création batch** : Support de `@api.model_create_multi` pour création multiple
 - **Compatibilité** : Pas de dépendance à `mail` ou `product`
 
 ---
@@ -148,11 +152,17 @@ from . import mission
 **Implémentation** : Génération automatique de référence via `ir.sequence`
 **Fichier** : `data/sequences.xml` créé avec code `orne.interim.mission`
 **Format** : `MIS-0001`, `MIS-0002`, etc.
+**Batch** : Méthode `create()` utilise `@api.model_create_multi` pour supporter la création multiple
 
 ### 5. Compatibilité Base
 **Corrections appliquées** :
 - Retiré `tracking=True` sur le champ `state` (évite dépendance à `mail`)
 - Remplacé `digits='Product Price'` par `digits=(16, 2)` (évite dépendance à `product`)
+
+### 6. Sécurité
+**Fichier** : `security/ir.model.access.csv`
+**Permissions** : Groupe `base.group_user` a tous les droits (CRUD) sur `orne_interim.mission`
+**Objectif** : Permettre aux utilisateurs standards de créer/modifier les missions
 
 ---
 
@@ -161,15 +171,17 @@ from . import mission
 ### Module Installable
 Le module est conçu pour être installable immédiatement avec :
 - Dépendance `base` uniquement
-- Fichier XML de séquence inclus
+- Fichiers XML inclus : sécurité + séquence
 - Structure minimale valide
 
 ### Tests Manuels Recommandés
-1. Installer le module (la séquence est créée automatiquement)
+1. Installer le module (vérifier que la séquence et les permissions sont créées)
 2. Créer une mission via l'interface technique (Menu Développeur > Modèles)
 3. Vérifier la génération automatique de la référence (format `MIS-0001`)
-4. Tester le calcul de la durée
-5. Vérifier les transitions d'état (sans tracking)
+4. Tester la création batch (plusieurs missions d'un coup)
+5. Tester le calcul de la durée
+6. Vérifier les transitions d'état (sans tracking)
+7. Vérifier que les utilisateurs standards peuvent créer/modifier/supprimer
 
 ---
 
@@ -183,7 +195,7 @@ Le module est conçu pour être installable immédiatement avec :
 
 ## Notes
 - **Pas de vues** : Conforme à la demande (pas d'UI dans cette phase)
-- **Pas de sécurité** : Pas de CSV ou groupes dans cette phase
+- **Sécurité** : Permissions minimales ajoutées pour `base.group_user`
 - **Pas de données demo** : Conforme à la demande
 - **Respect des règles** :
   - Préfixe `orne_interim.` utilisé
@@ -191,17 +203,20 @@ Le module est conçu pour être installable immédiatement avec :
   - Pas d'intégration sale/crm
   - Pas de dépendance à hr_timesheet
   - Compatibilité stricte avec `base` uniquement
+  - Support batch avec `@api.model_create_multi`
 
-## Fichiers Livrés (Phase 2 + Corrections)
+## Fichiers Livrés (Phase 2 Final)
 ```
 orne_interim_suite/
 ├── __init__.py
-├── __manifest__.py            # Avec data/sequences.xml
+├── __manifest__.py            # Avec security/ + data/
 ├── models/
 │   ├── __init__.py
-│   └── mission.py             # Sans tracking, avec digits=(16,2)
+│   └── mission.py             # create() batch, sans tracking, digits=(16,2)
+├── security/
+│   └── ir.model.access.csv    # NOUVEAU : permissions CRUD
 ├── data/
-│   └── sequences.xml          # NOUVEAU : séquence MIS-XXXX
+│   └── sequences.xml          # Séquence MIS-XXXX
 └── docs/
     └── IMPLEMENTATION_PHASE2.md  # Mis à jour
 ```
