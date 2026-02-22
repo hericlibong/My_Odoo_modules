@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Search View (déplacé en premier pour éviter référence forward) -->
+    <record id="view_orne_interim_mission_search" model="ir.ui.view">
+        <field name="name">orne.interim.mission.search</field>
+        <field name="model">orne_interim.mission</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="state" string="État"/>
+                <field name="mission_type" string="Type de mission"/>
+                <field name="partner_id" string="Client"/>
+                <filter name="filter_received" string="Reçues" domain="[('state','=','received')]"/>
+                <filter name="filter_in_progress" string="En cours" domain="[('state','=','in_progress')]"/>
+                <filter name="filter_closed" string="Clôturées" domain="[('state','=','closed')]"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_by_state" string="État" context="{'group_by':'state'}"/>
+                    <filter name="group_by_type" string="Type" context="{'group_by':'mission_type'}"/>
+                    <filter name="group_by_partner" string="Client" context="{'group_by':'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <!-- Action Window -->
     <record id="action_orne_interim_mission" model="ir.actions.act_window">
         <field name="name">Missions d'intérim</field>
@@ -50,27 +71,6 @@
                     </group>
                 </sheet>
             </form>
-        </field>
-    </record>
-
-    <!-- Search View -->
-    <record id="view_orne_interim_mission_search" model="ir.ui.view">
-        <field name="name">orne.interim.mission.search</field>
-        <field name="model">orne_interim.mission</field>
-        <field name="arch" type="xml">
-            <search>
-                <field name="state" string="État"/>
-                <field name="mission_type" string="Type de mission"/>
-                <field name="partner_id" string="Client"/>
-                <filter name="filter_received" string="Reçues" domain="[('state','=','received')]"/>
-                <filter name="filter_in_progress" string="En cours" domain="[('state','=','in_progress')]"/>
-                <filter name="filter_closed" string="Clôturées" domain="[('state','=','closed')]"/>
-                <group expand="0" string="Grouper par">
-                    <filter name="group_by_state" string="État" context="{'group_by':'state'}"/>
-                    <filter name="group_by_type" string="Type" context="{'group_by':'mission_type'}"/>
-                    <filter name="group_by_partner" string="Client" context="{'group_by':'partner_id'}"/>
-                </group>
-            </search>
         </field>
     </record>
 </odoo>

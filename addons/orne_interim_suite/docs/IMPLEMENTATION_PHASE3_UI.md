@@ -89,16 +89,19 @@ Rendre le modèle `orne_interim.mission` utilisable dans l'interface standard Od
 ```
 
 **Composants** :
-- **Action Window** (`action_orne_interim_mission`) : Point d'entrée pour ouvrir les missions
-- **Tree View** : Liste avec toutes les colonnes demandées
-- **Form View** :
-  - `name` en readonly
-  - `state` affiché en statusbar (pas de boutons)
-  - `duration_days` en readonly
-  - Tous les autres champs éditables
-- **Search View** :
-  - Filtres rapides par état
+- **Search View** : Déclarée en premier pour éviter les références forward
+  - Filtres rapides par état (Reçues, En cours, Clôturées)
   - Groupement par état/type/client
+- **Action Window** (`action_orne_interim_mission`) : Point d'entrée pour ouvrir les missions
+  - Référence la search view via `search_view_id`
+  - Mode d'affichage : tree + form
+- **Tree View** : Liste avec toutes les colonnes demandées
+  - Ordre : name, partner_id, mission_type, dates, expected_workers, hourly_rate, state, duration_days
+- **Form View** :
+  - `name` en readonly (généré automatiquement)
+  - `state` affiché en statusbar (pas de boutons d'action)
+  - `duration_days` en readonly (calculé)
+  - Tous les autres champs éditables
 
 ---
 
@@ -164,8 +167,16 @@ Rendre le modèle `orne_interim.mission` utilisable dans l'interface standard Od
 **Ordre critique** :
 1. `security/ir.model.access.csv` (d'abord pour les permissions)
 2. `data/sequences.xml` (ensuite pour les données)
-3. `views/mission_views.xml` (puis les vues qui référencent les données)
+3. `views/mission_views.xml` (puis les vues)
+   - **Important** : La search view est déclarée en premier dans le fichier pour éviter les références forward
 4. `views/menus.xml` (enfin les menus qui pointent vers les actions)
+
+**Raison** : Odoo charge les fichiers XML séquentiellement. Si l'action référence une search view déclarée après, cela provoque une erreur "External ID not found".
+
+### 5. Bonnes Pratiques XML
+**Correction appliquée** :
+- Déplacement de la search view avant l'action dans `mission_views.xml`
+- Évite les erreurs de référence forward lors de l'installation/upgrade
 
 ---
 
