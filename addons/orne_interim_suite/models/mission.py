@@ -115,8 +115,6 @@ class OrneInterimMission(models.Model):
         for rec in self:
             if rec.state in ['received', 'cancelled', 'invoiced']:
                 raise UserError("Retour impossible depuis l'état '{}'.".format(rec.state))
-            if rec.state == 'invoiced':
-                raise UserError("Mission facturée : retour interdit.")
             
             new_state = back_mapping.get(rec.state)
             if new_state:

@@ -56,7 +56,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="received,qualified,proposed,confirmed,in_progress,closed,invoiced,cancelled" statusbar_clickable="false"/>
+                    <field name="state" widget="statusbar" statusbar_visible="received,qualified,proposed,confirmed,in_progress,closed,invoiced,cancelled" options="{'clickable': false}"/>
                     <button name="action_back_step" string="Revenir" type="object" states="qualified,proposed,confirmed,in_progress,closed" class="btn-secondary"/>
                     <button name="action_cancel" string="Annuler" type="object" states="received,qualified,proposed,confirmed,in_progress,closed" class="btn-danger"/>
                     <button name="action_qualify" string="Qualifier" type="object" states="received" class="btn-primary"/>
