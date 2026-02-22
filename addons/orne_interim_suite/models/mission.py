@@ -32,8 +32,12 @@ class OrneInterimMission(models.Model):
         ('confirmed', 'Confirmée'),
         ('in_progress', 'En cours'),
         ('closed', 'Clôturée'),
-        ('invoiced', 'Facturée')
+        ('invoiced', 'Facturée'),
+        ('cancelled', 'Annulée')
     ], string='État', default='received', required=True)
+    
+    # Annulation
+    cancel_reason = fields.Text(string="Raison d'annulation")
     
     # Champs calculés
     duration_days = fields.Integer(string='Durée (jours)', compute='_compute_duration', store=True)
@@ -98,3 +102,39 @@ class OrneInterimMission(models.Model):
             if rec.state != 'closed':
                 raise UserError("Seules les missions à l'état 'Clôturée' peuvent être marquées comme facturées.")
             rec.state = 'invoiced'
+
+    def action_back_step(self):
+        """Revenir d'un cran dans le workflow"""
+        back_mapping = {
+            'qualified': 'received',
+            'proposed': 'qualified',
+            'confirmed': 'proposed',
+            'in_progress': 'confirmed',
+            'closed': 'in_progress'
+        }
+        for rec in self:
+            if rec.state in ['received', 'cancelled', 'invoiced']:
+                raise UserError("Retour impossible depuis l'état '{}'.".format(rec.state))
+            if rec.state == 'invoiced':
+                raise UserError("Mission facturée : retour interdit.")
+            
+            new_state = back_mapping.get(rec.state)
+            if new_state:
+                rec.state = new_state
+            else:
+                raise UserError("Transition de retour non définie pour l'état '{}'.".format(rec.state))
+
+    def action_cancel(self):
+        """Annuler la mission"""
+        for rec in self:
+            if rec.state == 'invoiced':
+                raise UserError("Mission facturée : annulation interdite.")
+            rec.state = 'cancelled'
+
+    def action_reactivate(self):
+        """Réactiver une mission annulée"""
+        for rec in self:
+            if rec.state != 'cancelled':
+                raise UserError("Seules les missions annulées peuvent être réactivées.")
+            rec.state = 'received'
+            rec.cancel_reason = False
