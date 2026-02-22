@@ -16,7 +16,9 @@
     'website': 'https://github.com/hericlibong/My_Odoo_modules', 
     'category': 'Human Resources', 
     'depends': ['base'],  # Dépendances minimales pour le MVP
-    'data': [],  # Pas de vues pour cette phase
+    'data': [
+        'data/sequences.xml',
+    ],  # Séquence pour la génération automatique des références
     'demo': [],  # Pas de données demo pour cette phase
     'installable': True, 
     'application': True, 
@@ -27,6 +29,7 @@
 
 **Points clés** :
 - Dépendance minimale (`base` uniquement) pour respecter les contraintes
+- Ajout de `data/sequences.xml` pour la séquence de référence
 - Pas de dépendances à `crm`, `sale` ou `account` à ce stade
 - Module marqué comme `application` pour apparition dans le menu Apps
 
@@ -59,7 +62,6 @@ class OrneInterimMission(models.Model):
     
     # Détails de la demande
     expected_workers = fields.Integer(string='Nombre de personnes', required=True, default=1)
-    hourly_rate = fields.Float(string='Taux horaire', digits='Product Price', help='Taux horaire facturé au client')
     description = fields.Text(string='Description des besoins')
     
     # Workflow
@@ -71,7 +73,10 @@ class OrneInterimMission(models.Model):
         ('in_progress', 'En cours'),
         ('closed', 'Clôturée'),
         ('invoiced', 'Facturée')
-    ], string='État', default='received', required=True, tracking=True)
+    ], string='État', default='received', required=True)
+    
+    # Détails de la demande (suite)
+    hourly_rate = fields.Float(string='Taux horaire', digits=(16, 2), help='Taux horaire facturé au client')
     
     # Champs calculés
     duration_days = fields.Integer(string='Durée (jours)', compute='_compute_duration', store=True)
@@ -100,12 +105,12 @@ class OrneInterimMission(models.Model):
   - `mission_type` : BTP ou Nettoyage/Tertiaire
   - `date_start`/`date_end` : Période de mission
   - `expected_workers` : Nombre de personnes demandées
-  - `hourly_rate` : Tarif horaire (pour calculs futurs)
-  - `state` : Workflow complet 7 états
+  - `hourly_rate` : Tarif horaire avec `digits=(16, 2)` (compatible base)
+  - `state` : Workflow complet 7 états (sans tracking pour compatibilité)
 - **Calculs** :
   - `duration_days` : Durée automatique en jours
-  - Génération automatique de référence via séquence
-- **Tracking** : Historique des changements d'état activé
+  - Génération automatique de référence via séquence `orne.interim.mission`
+- **Compatibilité** : Pas de dépendance à `mail` ou `product`
 
 ---
 
@@ -141,7 +146,13 @@ from . import mission
 
 ### 4. Séquence
 **Implémentation** : Génération automatique de référence via `ir.sequence`
-**Code** : `orne.interim.mission` (à créer manuellement ou via data XML plus tard)
+**Fichier** : `data/sequences.xml` créé avec code `orne.interim.mission`
+**Format** : `MIS-0001`, `MIS-0002`, etc.
+
+### 5. Compatibilité Base
+**Corrections appliquées** :
+- Retiré `tracking=True` sur le champ `state` (évite dépendance à `mail`)
+- Remplacé `digits='Product Price'` par `digits=(16, 2)` (évite dépendance à `product`)
 
 ---
 
@@ -149,15 +160,16 @@ from . import mission
 
 ### Module Installable
 Le module est conçu pour être installable immédiatement avec :
-- Aucune dépendance externe
-- Aucun fichier XML requis
+- Dépendance `base` uniquement
+- Fichier XML de séquence inclus
 - Structure minimale valide
 
 ### Tests Manuels Recommandés
-1. Créer une mission via l'interface technique (Menu Développeur > Modèles)
-2. Vérifier la génération automatique de la référence
-3. Tester le calcul de la durée
-4. Vérifier le tracking des changements d'état
+1. Installer le module (la séquence est créée automatiquement)
+2. Créer une mission via l'interface technique (Menu Développeur > Modèles)
+3. Vérifier la génération automatique de la référence (format `MIS-0001`)
+4. Tester le calcul de la durée
+5. Vérifier les transitions d'état (sans tracking)
 
 ---
 
@@ -178,3 +190,18 @@ Le module est conçu pour être installable immédiatement avec :
   - Pas de modèle worker créé
   - Pas d'intégration sale/crm
   - Pas de dépendance à hr_timesheet
+  - Compatibilité stricte avec `base` uniquement
+
+## Fichiers Livrés (Phase 2 + Corrections)
+```
+orne_interim_suite/
+├── __init__.py
+├── __manifest__.py            # Avec data/sequences.xml
+├── models/
+│   ├── __init__.py
+│   └── mission.py             # Sans tracking, avec digits=(16,2)
+├── data/
+│   └── sequences.xml          # NOUVEAU : séquence MIS-XXXX
+└── docs/
+    └── IMPLEMENTATION_PHASE2.md  # Mis à jour
+```

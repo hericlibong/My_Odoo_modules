@@ -32,7 +32,10 @@ class OrneInterimMission(models.Model):
         ('in_progress', 'En cours'),
         ('closed', 'Clôturée'),
         ('invoiced', 'Facturée')
-    ], string='État', default='received', required=True, tracking=True)
+    ], string='État', default='received', required=True)
+    
+    # Détails de la demande
+    hourly_rate = fields.Float(string='Taux horaire', digits=(16, 2), help='Taux horaire facturé au client')
     
     # Champs calculés
     duration_days = fields.Integer(string='Durée (jours)', compute='_compute_duration', store=True)

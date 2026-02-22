@@ -7,7 +7,9 @@
     'website': 'https://github.com/hericlibong/My_Odoo_modules', 
     'category': 'Human Resources', 
     'depends': ['base'],  # Dépendances minimales pour le MVP
-    'data': [],  # Pas de vues pour cette phase
+    'data': [
+        'data/sequences.xml',
+    ],  # Séquence pour la génération automatique des références
     'demo': [],  # Pas de données demo pour cette phase
     'installable': True, 
     'application': True, 
