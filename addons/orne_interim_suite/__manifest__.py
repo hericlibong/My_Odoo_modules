@@ -10,7 +10,9 @@
     'data': [
         'security/ir.model.access.csv',
         'data/sequences.xml',
-    ],  # Accès + séquence pour la génération automatique des références
+        'views/mission_views.xml',
+        'views/menus.xml',
+    ],  # Accès + séquence + vues + menus
     'demo': [],  # Pas de données demo pour cette phase
     'installable': True, 
     'application': True, 

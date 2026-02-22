@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Action Window -->
+    <record id="action_orne_interim_mission" model="ir.actions.act_window">
+        <field name="name">Missions d'intérim</field>
+        <field name="res_model">orne_interim.mission</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_orne_interim_mission_search"/>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_orne_interim_mission_tree" model="ir.ui.view">
+        <field name="name">orne.interim.mission.tree</field>
+        <field name="model">orne_interim.mission</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="mission_type"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="expected_workers"/>
+                <field name="hourly_rate"/>
+                <field name="state"/>
+                <field name="duration_days"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_orne_interim_mission_form" model="ir.ui.view">
+        <field name="name">orne.interim.mission.form</field>
+        <field name="model">orne_interim.mission</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" readonly="1"/>
+                        <field name="partner_id"/>
+                        <field name="mission_type"/>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
+                        <field name="expected_workers"/>
+                        <field name="hourly_rate"/>
+                        <field name="duration_days" readonly="1"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_orne_interim_mission_search" model="ir.ui.view">
+        <field name="name">orne.interim.mission.search</field>
+        <field name="model">orne_interim.mission</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="state" string="État"/>
+                <field name="mission_type" string="Type de mission"/>
+                <field name="partner_id" string="Client"/>
+                <filter name="filter_received" string="Reçues" domain="[('state','=','received')]"/>
+                <filter name="filter_in_progress" string="En cours" domain="[('state','=','in_progress')]"/>
+                <filter name="filter_closed" string="Clôturées" domain="[('state','=','closed')]"/>
+                <group expand="0" string="Grouper par">
+                    <filter name="group_by_state" string="État" context="{'group_by':'state'}"/>
+                    <filter name="group_by_type" string="Type" context="{'group_by':'mission_type'}"/>
+                    <filter name="group_by_partner" string="Client" context="{'group_by':'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>
