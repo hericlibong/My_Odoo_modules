@@ -8,12 +8,15 @@
     'category': 'Human Resources', 
     'depends': ['base'],  # Dépendances minimales pour le MVP
     'data': [
+        'security/security_groups.xml',
         'security/ir.model.access.csv',
         'data/sequences.xml',
         'views/mission_views.xml',
         'views/menus.xml',
-    ],  # Accès + séquence + vues + menus
-    'demo': [],  # Pas de données demo pour cette phase
+    ],  # Sécurité + séquence + vues + menus
+    'demo': [
+        'data/demo.xml',
+    ],  # Données de démonstration
     'installable': True, 
     'application': True, 
     'auto_install': False, 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Groupe Manager -->
+    <record id="group_orne_interim_manager" model="res.groups">
+        <field name="name">Manager Intérim</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Groupe Commercial -->
+    <record id="group_orne_interim_commercial" model="res.groups">
+        <field name="name">Commercial Intérim</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Groupe Administratif -->
+    <record id="group_orne_interim_admin" model="res.groups">
+        <field name="name">Administratif Intérim</field>
+        <field name="category_id" ref="base.module_category_human_resources"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+</odoo>

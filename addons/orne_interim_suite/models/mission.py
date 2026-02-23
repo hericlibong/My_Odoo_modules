@@ -21,7 +21,8 @@ class OrneInterimMission(models.Model):
     
     # Détails de la demande
     expected_workers = fields.Integer(string='Nombre de personnes', required=True, default=1)
-    hourly_rate = fields.Float(string='Taux horaire', digits=(16, 2), help='Taux horaire facturé au client')
+    hourly_rate = fields.Float(string='Taux horaire', digits=(16, 2), help='Taux horaire facturé au client',
+                               groups="orne_interim_suite.group_orne_interim_manager,orne_interim_suite.group_orne_interim_admin")
     description = fields.Text(string='Description des besoins')
     
     # Workflow

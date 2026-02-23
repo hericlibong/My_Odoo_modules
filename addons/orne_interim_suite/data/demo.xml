@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Clients BTP -->
+    <record id="demo_partner_btp_1" model="res.partner">
+        <field name="name">BTP Orne Construction</field>
+        <field name="email">contact@btp-orne.fr</field>
+        <field name="phone">0233001122</field>
+        <field name="street">12 Rue des Artisans</field>
+        <field name="city">Alençon</field>
+        <field name="zip">61000</field>
+        <field name="country_id" ref="base.fr"/>
+    </record>
+
+    <record id="demo_partner_btp_2" model="res.partner">
+        <field name="name">SARL Renovation Pro</field>
+        <field name="email">info@renovation-pro.fr</field>
+        <field name="phone">0233003344</field>
+        <field name="street">5 Avenue du Bâtiment</field>
+        <field name="city">Argentan</field>
+        <field name="zip">61200</field>
+        <field name="country_id" ref="base.fr"/>
+    </record>
+
+    <!-- Client Nettoyage -->
+    <record id="demo_partner_nettoyage" model="res.partner">
+        <field name="name">Nettoyage Eco Orne</field>
+        <field name="email">contact@nettoyage-eco.fr</field>
+        <field name="phone">0233005566</field>
+        <field name="street">8 Rue de la Propreté</field>
+        <field name="city">Flers</field>
+        <field name="zip">61100</field>
+        <field name="country_id" ref="base.fr"/>
+    </record>
+
+    <!-- Missions -->
+    <record id="demo_mission_btp_1" model="orne_interim.mission">
+        <field name="partner_id" ref="demo_partner_btp_1"/>
+        <field name="mission_type">btp</field>
+        <field name="date_start">2025-01-15</field>
+        <field name="date_end">2025-01-31</field>
+        <field name="expected_workers">3</field>
+        <field name="hourly_rate">28.50</field>
+        <field name="description">Mission de construction de 3 maisons individuelles</field>
+        <field name="state">received</field>
+    </record>
+
+    <record id="demo_mission_btp_2" model="orne_interim.mission">
+        <field name="partner_id" ref="demo_partner_btp_2"/>
+        <field name="mission_type">btp</field>
+        <field name="date_start">2025-02-01</field>
+        <field name="date_end">2025-02-15</field>
+        <field name="expected_workers">2</field>
+        <field name="hourly_rate">32.00</field>
+        <field name="description">Rénovation complète d'un bâtiment industriel</field>
+        <field name="state">qualified</field>
+    </record>
+
+    <record id="demo_mission_nettoyage" model="orne_interim.mission">
+        <field name="partner_id" ref="demo_partner_nettoyage"/>
+        <field name="mission_type">nettoyage</field>
+        <field name="date_start">2025-01-20</field>
+        <field name="date_end">2025-01-25</field>
+        <field name="expected_workers">4</field>
+        <field name="hourly_rate">22.50</field>
+        <field name="description">Nettoyage post-événementiel pour un salon professionnel</field>
+        <field name="state">in_progress</field>
+    </record>
+</odoo>
