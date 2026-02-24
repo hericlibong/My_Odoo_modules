@@ -65,6 +65,13 @@ class OrneInterimMission(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('orne.interim.mission') or '/'
         return super(OrneInterimMission, self).create(vals_list)
 
+    def write(self, vals):
+        # Protection contre les changements d'état manuels
+        if 'state' in vals and not self.env.context.get('allow_state_write'):
+            raise UserError("Changement d’état manuel non autorisé. Veuillez utiliser les boutons du workflow.")
+        return super(OrneInterimMission, self).write(vals)
+
+
     # Méthodes de transition du workflow
     def action_qualify(self):
         for rec in self:
@@ -78,19 +85,19 @@ class OrneInterimMission(models.Model):
                 raise UserError("La date de fin doit être postérieure à la date de début.")
             if rec.expected_workers < 1:
                 raise UserError("Le nombre de personnes doit être au moins 1.")
-            rec.state = 'qualified'
+            self.with_context(allow_state_write=True).write({'state': 'qualified'})
 
     def action_propose(self):
         for rec in self:
             if rec.state != 'qualified':
                 raise UserError("Seules les missions à l'état 'Qualifiée' peuvent être proposées.")
-            rec.state = 'proposed'
+            self.with_context(allow_state_write=True).write({'state': 'proposed'})
 
     def action_confirm(self):
         for rec in self:
             if rec.state != 'proposed':
                 raise UserError("Seules les missions à l'état 'Proposée' peuvent être confirmées.")
-            rec.state = 'confirmed'
+            self.with_context(allow_state_write=True).write({'state': 'confirmed'})
 
     def action_start(self):
         for rec in self:
@@ -99,7 +106,7 @@ class OrneInterimMission(models.Model):
             today = fields.Date.context_today(self)
             if today > rec.date_end:
                 raise UserError("On ne peut pas démarrer une mission dont la date de fin est déjà dépassée.")
-            rec.state = 'in_progress'
+            self.with_context(allow_state_write=True).write({'state': 'in_progress'})
 
     def action_close(self):
         for rec in self:
@@ -108,7 +115,7 @@ class OrneInterimMission(models.Model):
             today = fields.Date.context_today(self)
             if today < rec.date_end:
                 raise UserError("Impossible de clôturer une mission qui n'est pas encore terminée dans le temps.")
-            rec.state = 'closed'
+            self.with_context(allow_state_write=True).write({'state': 'closed'})
 
     def action_invoice_mark(self):
         for rec in self:
@@ -117,7 +124,7 @@ class OrneInterimMission(models.Model):
             today = fields.Date.context_today(self)
             if today < rec.date_end:
                 raise UserError("Impossible de facturer une mission qui n'est pas encore terminée dans le temps.")
-            rec.state = 'invoiced'
+            self.with_context(allow_state_write=True).write({'state': 'invoiced'})
 
     def action_back_step(self):
         """Revenir d'un cran dans le workflow"""
@@ -150,5 +157,5 @@ class OrneInterimMission(models.Model):
         for rec in self:
             if rec.state != 'cancelled':
                 raise UserError("Seules les missions annulées peuvent être réactivées.")
-            rec.state = 'received'
+            self.with_context(allow_state_write=True).write({'state': 'received'})
             rec.cancel_reason = False

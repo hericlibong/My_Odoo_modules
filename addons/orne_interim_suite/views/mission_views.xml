@@ -26,7 +26,7 @@
     <record id="action_orne_interim_mission" model="ir.actions.act_window">
         <field name="name">Missions d'intérim</field>
         <field name="res_model">orne_interim.mission</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">kanban,tree,form</field>
         <field name="search_view_id" ref="view_orne_interim_mission_search"/>
     </record>
 
@@ -84,4 +84,36 @@
             </form>
         </field>
     </record>
+    <!-- Kanban View -->
+    <record id="view_orne_interim_mission_kanban" model="ir.ui.view">
+        <field name="name">orne.interim.mission.kanban</field>
+        <field name="model">orne_interim.mission</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" records_draggable="0">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click oe_kanban_card oe_kanban_color_#{kanban_color}">
+                            <div class="oe_kanban_content">
+                                <div>
+                                    <strong><field name="name"/></strong>
+                                    <div>
+                                        <field name="partner_id"/>
+                                        <span t-if="record.mission_type.raw_value == 'btp'" class="badge badge-primary">BTP</span>
+                                        <span t-if="record.mission_type.raw_value == 'nettoyage'" class="badge badge-info">Nettoyage</span>
+                                    </div>
+                                    <div>
+                                        <field name="date_start"/> → <field name="date_end"/>
+                                    </div>
+                                    <div>
+                                        <i class="fa fa-users" title="Nombre de personnes"/> <field name="expected_workers"/> personnes
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
 </odoo>
