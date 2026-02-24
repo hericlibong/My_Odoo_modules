@@ -51,6 +51,12 @@ class OrneInterimMission(models.Model):
             else:
                 record.duration_days = 0
     
+    @api.constrains('date_start', 'date_end')
+    def _check_dates(self):
+        for record in self:
+            if record.date_start and record.date_end and record.date_end < record.date_start:
+                raise ValidationError("La date de fin doit être postérieure ou égale à la date de début.")
+
     # Séquence automatique (compatible batch)
     @api.model_create_multi
     def create(self, vals_list):
@@ -90,18 +96,27 @@ class OrneInterimMission(models.Model):
         for rec in self:
             if rec.state != 'confirmed':
                 raise UserError("Seules les missions à l'état 'Confirmée' peuvent être démarrées.")
+            today = fields.Date.context_today(self)
+            if today > rec.date_end:
+                raise UserError("On ne peut pas démarrer une mission dont la date de fin est déjà dépassée.")
             rec.state = 'in_progress'
 
     def action_close(self):
         for rec in self:
             if rec.state != 'in_progress':
                 raise UserError("Seules les missions à l'état 'En cours' peuvent être clôturées.")
+            today = fields.Date.context_today(self)
+            if today < rec.date_end:
+                raise UserError("Impossible de clôturer une mission qui n'est pas encore terminée dans le temps.")
             rec.state = 'closed'
 
     def action_invoice_mark(self):
         for rec in self:
             if rec.state != 'closed':
                 raise UserError("Seules les missions à l'état 'Clôturée' peuvent être marquées comme facturées.")
+            today = fields.Date.context_today(self)
+            if today < rec.date_end:
+                raise UserError("Impossible de facturer une mission qui n'est pas encore terminée dans le temps.")
             rec.state = 'invoiced'
 
     def action_back_step(self):

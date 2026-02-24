@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Clients BTP -->
+    <!--
+    DÉMO DÉSACTIVÉE — on test en création manuelle. À réactiver en fin de projet.
+    
+    Ce fichier est conservé pour référence mais n'est plus chargé à l'installation.
+    Les données de démo seront réintroduites une fois toutes les règles strictes
+    validées et le workflow stabilisé.
+    
+    Pour réactiver :
+    1. Décommenter le contenu
+    2. Ajouter 'data/demo.xml' dans la clé 'demo' du manifest
+    3. Tester en environnement dédié avant déploiement
+    -->
+    <!--
+    CLIENTS (commenté pour désactivation)
+    
     <record id="demo_partner_btp_1" model="res.partner">
         <field name="name">BTP Orne Construction</field>
         <field name="email">contact@btp-orne.fr</field>
@@ -21,7 +35,6 @@
         <field name="country_id" ref="base.fr"/>
     </record>
 
-    <!-- Client Nettoyage -->
     <record id="demo_partner_nettoyage" model="res.partner">
         <field name="name">Nettoyage Eco Orne</field>
         <field name="email">contact@nettoyage-eco.fr</field>
@@ -31,8 +44,9 @@
         <field name="zip">61100</field>
         <field name="country_id" ref="base.fr"/>
     </record>
-
-    <!-- Missions -->
+    
+    MISSIONS (commenté pour désactivation)
+    
     <record id="demo_mission_btp_1" model="orne_interim.mission">
         <field name="partner_id" ref="demo_partner_btp_1"/>
         <field name="mission_type">btp</field>
@@ -65,4 +79,5 @@
         <field name="description">Nettoyage post-événementiel pour un salon professionnel</field>
         <field name="state">in_progress</field>
     </record>
+    -->
 </odoo>

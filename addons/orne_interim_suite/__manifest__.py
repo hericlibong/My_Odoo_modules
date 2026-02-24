@@ -14,9 +14,7 @@
         'views/mission_views.xml',
         'views/menus.xml',
     ],  # Sécurité + séquence + vues + menus
-    'demo': [
-        'data/demo.xml',
-    ],  # Données de démonstration
+    'demo': [],  # DÉMO DÉSACTIVÉE - Tests en création manuelle uniquement
     'installable': True, 
     'application': True, 
     'auto_install': False, 

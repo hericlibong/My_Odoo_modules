@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
+<odoo noupdate="1">
     <record id="seq_orne_interim_mission" model="ir.sequence">
         <field name="name">Séquence missions intérim</field>
         <field name="code">orne.interim.mission</field>
         <field name="prefix">MIS-</field>
         <field name="padding">4</field>
-        <field name="number_next">1</field>
+        <!-- number_next non forcé pour éviter les régressions après upgrade -->
         <field name="number_increment">1</field>
     </record>
 </odoo>
