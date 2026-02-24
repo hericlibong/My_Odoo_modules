@@ -90,12 +90,6 @@
         <field name="model">orne_interim.mission</field>
         <field name="arch" type="xml">
             <kanban default_group_by="state" records_draggable="0">
-                <field name="name"/>
-                <field name="partner_id"/>
-                <field name="mission_type"/>
-                <field name="date_start"/>
-                <field name="date_end"/>
-                <field name="expected_workers"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_global_click oe_kanban_card oe_kanban_color_#{kanban_color}">
@@ -105,8 +99,8 @@
                                     <div>
                                         <field name="partner_id"/>
                                         <field name="mission_type"/>
-<span t-if="record.mission_type &amp;&amp; record.mission_type.raw_value == 'btp'" class="badge badge-primary">BTP</span>
-                                        <span t-if="record.mission_type &amp;&amp; record.mission_type.raw_value == 'nettoyage'" class="badge badge-info">Nettoyage</span>
+<span t-if="record.mission_type.raw_value == 'btp'" class="badge badge-primary">BTP</span>
+                                        <span t-if="record.mission_type.raw_value == 'nettoyage'" class="badge badge-info">Nettoyage</span>
                                     </div>
                                     <div>
                                         <field name="date_start"/> → <field name="date_end"/>
