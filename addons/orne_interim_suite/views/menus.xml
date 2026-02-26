@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Menu Top-Level -->
-    <menuitem id="menu_orne_interim_root" name="Intérim" sequence="10"/>
+    <menuitem id="menu_orne_interim_root" name="Intérim" sequence="10"
+              groups="orne_interim_suite.group_orne_interim_manager,orne_interim_suite.group_orne_interim_commercial,orne_interim_suite.group_orne_interim_admin"/>
 
     <!-- Sous-menu Missions -->
     <menuitem id="menu_orne_interim_mission" name="Missions" parent="menu_orne_interim_root"
-              action="action_orne_interim_mission" sequence="10"/>
+              action="action_orne_interim_mission" sequence="10"
+              groups="orne_interim_suite.group_orne_interim_manager,orne_interim_suite.group_orne_interim_commercial,orne_interim_suite.group_orne_interim_admin"/>
 </odoo>

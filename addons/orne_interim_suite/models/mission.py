@@ -1,5 +1,5 @@
 from odoo import models, fields, api
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 class OrneInterimMission(models.Model):
     _name = 'orne_interim.mission'
@@ -85,19 +85,19 @@ class OrneInterimMission(models.Model):
                 raise UserError("La date de fin doit être postérieure à la date de début.")
             if rec.expected_workers < 1:
                 raise UserError("Le nombre de personnes doit être au moins 1.")
-            self.with_context(allow_state_write=True).write({'state': 'qualified'})
+            rec.with_context(allow_state_write=True).write({'state': 'qualified'})
 
     def action_propose(self):
         for rec in self:
             if rec.state != 'qualified':
                 raise UserError("Seules les missions à l'état 'Qualifiée' peuvent être proposées.")
-            self.with_context(allow_state_write=True).write({'state': 'proposed'})
+            rec.with_context(allow_state_write=True).write({'state': 'proposed'})
 
     def action_confirm(self):
         for rec in self:
             if rec.state != 'proposed':
                 raise UserError("Seules les missions à l'état 'Proposée' peuvent être confirmées.")
-            self.with_context(allow_state_write=True).write({'state': 'confirmed'})
+            rec.with_context(allow_state_write=True).write({'state': 'confirmed'})
 
     def action_start(self):
         for rec in self:
@@ -106,7 +106,7 @@ class OrneInterimMission(models.Model):
             today = fields.Date.context_today(self)
             if today > rec.date_end:
                 raise UserError("On ne peut pas démarrer une mission dont la date de fin est déjà dépassée.")
-            self.with_context(allow_state_write=True).write({'state': 'in_progress'})
+            rec.with_context(allow_state_write=True).write({'state': 'in_progress'})
 
     def action_close(self):
         for rec in self:
@@ -115,7 +115,7 @@ class OrneInterimMission(models.Model):
             today = fields.Date.context_today(self)
             if today < rec.date_end:
                 raise UserError("Impossible de clôturer une mission qui n'est pas encore terminée dans le temps.")
-            self.with_context(allow_state_write=True).write({'state': 'closed'})
+            rec.with_context(allow_state_write=True).write({'state': 'closed'})
 
     def action_invoice_mark(self):
         for rec in self:
@@ -124,7 +124,7 @@ class OrneInterimMission(models.Model):
             today = fields.Date.context_today(self)
             if today < rec.date_end:
                 raise UserError("Impossible de facturer une mission qui n'est pas encore terminée dans le temps.")
-            self.with_context(allow_state_write=True).write({'state': 'invoiced'})
+            rec.with_context(allow_state_write=True).write({'state': 'invoiced'})
 
     def action_back_step(self):
         """Revenir d'un cran dans le workflow"""
@@ -141,7 +141,7 @@ class OrneInterimMission(models.Model):
             
             new_state = back_mapping.get(rec.state)
             if new_state:
-                rec.state = new_state
+                rec.with_context(allow_state_write=True).write({'state': new_state})
             else:
                 raise UserError("Transition de retour non définie pour l'état '{}'.".format(rec.state))
 
@@ -150,12 +150,14 @@ class OrneInterimMission(models.Model):
         for rec in self:
             if rec.state == 'invoiced':
                 raise UserError("Mission facturée : annulation interdite.")
-            rec.state = 'cancelled'
+            rec.with_context(allow_state_write=True).write({'state': 'cancelled'})
 
     def action_reactivate(self):
         """Réactiver une mission annulée"""
         for rec in self:
             if rec.state != 'cancelled':
                 raise UserError("Seules les missions annulées peuvent être réactivées.")
-            self.with_context(allow_state_write=True).write({'state': 'received'})
-            rec.cancel_reason = False
+            rec.with_context(allow_state_write=True).write({
+                'state': 'received',
+                'cancel_reason': False,
+            })
