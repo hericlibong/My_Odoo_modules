@@ -3,26 +3,38 @@ from odoo.exceptions import UserError, ValidationError
 
 class OrneInterimMission(models.Model):
     _name = 'orne_interim.mission'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Demande de mission d\'intérim'
     
     # Champs de base
     name = fields.Char(string='Référence', required=True, readonly=True, default='/')
-    partner_id = fields.Many2one('res.partner', string='Client', required=True, help='Entreprise cliente')
+    partner_id = fields.Many2one(
+        'res.partner',
+        string='Client',
+        required=True,
+        help='Entreprise cliente',
+        tracking=True,
+    )
     
     # Type de mission
     mission_type = fields.Selection([
         ('btp', 'BTP'),
         ('nettoyage', 'Nettoyage/Tertiaire')
-    ], string='Type de mission', required=True, default='btp')
+    ], string='Type de mission', required=True, default='btp', tracking=True)
     
     # Période
-    date_start = fields.Date(string='Date de début', required=True)
-    date_end = fields.Date(string='Date de fin', required=True)
+    date_start = fields.Date(string='Date de début', required=True, tracking=True)
+    date_end = fields.Date(string='Date de fin', required=True, tracking=True)
     
     # Détails de la demande
-    expected_workers = fields.Integer(string='Nombre de personnes', required=True, default=1)
-    hourly_rate = fields.Float(string='Taux horaire', digits=(16, 2), help='Taux horaire facturé au client',
-                               groups="orne_interim_suite.group_orne_interim_manager,orne_interim_suite.group_orne_interim_admin")
+    expected_workers = fields.Integer(string='Nombre de personnes', required=True, default=1, tracking=True)
+    hourly_rate = fields.Float(
+        string='Taux horaire',
+        digits=(16, 2),
+        help='Taux horaire facturé au client',
+        groups="orne_interim_suite.group_orne_interim_manager,orne_interim_suite.group_orne_interim_admin",
+        tracking=True,
+    )
     description = fields.Text(string='Description des besoins')
     
     # Workflow
@@ -35,7 +47,7 @@ class OrneInterimMission(models.Model):
         ('closed', 'Clôturée'),
         ('invoiced', 'Facturée'),
         ('cancelled', 'Annulée')
-    ], string='État', default='received', required=True)
+    ], string='État', default='received', required=True, tracking=True)
     
     # Annulation
     cancel_reason = fields.Text(string="Raison d'annulation")

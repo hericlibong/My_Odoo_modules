@@ -6,7 +6,7 @@
     'author': 'AC', 
     'website': 'https://github.com/hericlibong/My_Odoo_modules', 
     'category': 'Human Resources', 
-    'depends': ['base'],  # Dépendances minimales pour le MVP
+    'depends': ['base', 'mail'],  # Dépendances minimales + chatter/tracking
     'data': [
         'security/security_groups.xml',
         'security/ir.model.access.csv',
