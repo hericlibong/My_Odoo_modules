@@ -126,7 +126,11 @@ class OrneInterimMission(models.Model):
                 raise UserError("Seules les missions à l'état 'En cours' peuvent être clôturées.")
             today = fields.Date.context_today(self)
             if today < rec.date_end:
-                raise UserError("Impossible de clôturer une mission qui n'est pas encore terminée dans le temps.")
+                planned_end = rec.date_end.strftime('%d/%m/%Y') if rec.date_end else "non renseignée"
+                raise UserError(
+                    "Impossible de clôturer une mission qui n'est pas encore terminée dans le temps. "
+                    "Date de fin prévue : %s." % planned_end
+                )
             rec.with_context(allow_state_write=True).write({'state': 'closed'})
 
     def action_invoice_mark(self):

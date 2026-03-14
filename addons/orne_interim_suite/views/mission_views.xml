@@ -61,19 +61,21 @@
                 <header>
                     <field name="state" widget="statusbar" statusbar_visible="received,qualified,proposed,confirmed,in_progress,closed,invoiced,cancelled" options="{'clickable': false}"/>
                     <button name="action_back_step" string="Revenir" type="object" states="qualified,proposed,confirmed,in_progress,closed" class="btn-secondary"/>
-                    <button name="action_cancel" string="Annuler" type="object" states="received,qualified,proposed,confirmed,in_progress,closed" class="btn-danger"/>
-                    <button name="action_qualify" string="Qualifier" type="object" states="received" class="btn-primary"/>
-                    <button name="action_propose" string="Proposer" type="object" states="qualified" class="btn-primary"/>
-                    <button name="action_confirm" string="Confirmer" type="object" states="proposed" class="btn-primary"/>
-                    <button name="action_start" string="Démarrer" type="object" states="confirmed" class="btn-primary"/>
-                    <button name="action_close" string="Clôturer" type="object" states="in_progress" class="btn-primary"/>
-                    <button name="action_invoice_mark" string="Marquer facturée" type="object" states="closed" class="btn-primary"/>
-                    <button name="action_reactivate" string="Réactiver" type="object" states="cancelled" class="btn-success"/>
+                    <button name="action_cancel" string="Annuler" type="object" states="received,qualified,proposed,confirmed,in_progress,closed" class="btn-secondary"/>
+                    <button name="action_qualify" string="Qualifier" type="object" states="received" class="oe_highlight"/>
+                    <button name="action_propose" string="Proposer" type="object" states="qualified" class="oe_highlight"/>
+                    <button name="action_confirm" string="Confirmer" type="object" states="proposed" class="oe_highlight"/>
+                    <button name="action_start" string="Démarrer" type="object" states="confirmed" class="oe_highlight"/>
+                    <button name="action_close" string="Clôturer" type="object" states="in_progress" class="oe_highlight"/>
+                    <button name="action_invoice_mark" string="Marquer facturée" type="object" states="closed" class="oe_highlight"/>
+                    <button name="action_reactivate" string="Réactiver" type="object" states="cancelled" class="oe_highlight"/>
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="ANNULÉE" bg_color="bg-danger"
                             attrs="{'invisible': [('state', '!=', 'cancelled')]}"/>
-                    <widget name="web_ribbon" title="CLÔTURÉE" bg_color="bg-secondary"
+                    <widget name="web_ribbon" title="EN COURS" bg_color="bg-info"
+                            attrs="{'invisible': [('state', '!=', 'in_progress')]}"/>
+                    <widget name="web_ribbon" title="CLÔTURÉE" bg_color="bg-dark"
                             attrs="{'invisible': [('state', '!=', 'closed')]}"/>
                     <widget name="web_ribbon" title="FACTURÉE" bg_color="bg-success"
                             attrs="{'invisible': [('state', '!=', 'invoiced')]}"/>
@@ -82,29 +84,50 @@
                             <field name="name" readonly="1"/>
                         </h1>
                     </div>
+                    <group string="Synthèse mission">
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="mission_type"/>
+                            <field name="expected_workers"/>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end" attrs="{'invisible': [('state', '=', 'in_progress')]}"/>
+                            <field name="state" readonly="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert"
+                         attrs="{'invisible': [('state', '!=', 'in_progress')]}">
+                        <strong>Date de fin à surveiller :</strong>
+                        <field name="date_end" nolabel="1" readonly="1" class="oe_inline"/>
+                    </div>
+                    <group string="Description de la mission" col="1">
+                        <field name="description" nolabel="1"
+                               placeholder="Précisez le besoin client, le contexte et les contraintes éventuelles..."/>
+                    </group>
                     <notebook>
                         <page string="Demande">
-                            <group>
+                            <group string="Contexte de la demande">
                                 <group>
                                     <field name="partner_id"/>
                                     <field name="mission_type"/>
                                     <field name="expected_workers"/>
                                 </group>
                                 <group>
-                                    <field name="description" placeholder="Précisez le besoin client, le contexte et les contraintes éventuelles..."/>
+                                    <field name="state" readonly="1"/>
+                                    <field name="cancel_reason" attrs="{'invisible': [('state', '!=', 'cancelled')]}"/>
                                 </group>
                             </group>
                         </page>
                         <page string="Planification">
-                            <group>
+                            <group string="Période de mission">
                                 <group>
                                     <field name="date_start"/>
                                     <field name="date_end"/>
-                                    <field name="duration_days" readonly="1"/>
                                 </group>
                                 <group>
-                                    <field name="state" readonly="1"/>
-                                    <field name="cancel_reason" attrs="{'invisible': [('state', '!=', 'cancelled')]}"/>
+                                    <field name="duration_days" string="Durée calculée (jours)" readonly="1"/>
+                                    <div class="o_form_label text-muted">Calcul automatique à partir des dates de début et de fin.</div>
                                 </group>
                             </group>
                         </page>
