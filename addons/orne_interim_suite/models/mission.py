@@ -1,10 +1,30 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import format_date
 
 class OrneInterimMission(models.Model):
     _name = 'orne_interim.mission'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Demande de mission d\'intérim'
+
+    _LOCKED_FIELDS_FROM_IN_PROGRESS = {
+        'partner_id',
+        'mission_type',
+        'expected_workers',
+        'description',
+        'date_start',
+        'date_end',
+    }
+    _LOCKED_FIELDS_IN_TERMINAL_STATES = {'hourly_rate'}
+    _LOCKED_FIELD_LABELS = {
+        'partner_id': 'Client',
+        'mission_type': 'Type de mission',
+        'expected_workers': 'Nombre de personnes',
+        'description': 'Description',
+        'date_start': 'Date de début',
+        'date_end': 'Date de fin',
+        'hourly_rate': 'Taux horaire',
+    }
     
     # Champs de base
     name = fields.Char(string='Référence', required=True, readonly=True, default='/')
@@ -81,7 +101,48 @@ class OrneInterimMission(models.Model):
         # Protection contre les changements d'état manuels
         if 'state' in vals and not self.env.context.get('allow_state_write'):
             raise UserError("Changement d’état manuel non autorisé. Veuillez utiliser les boutons du workflow.")
+
+        if not self.env.context.get('bypass_mission_lock'):
+            updated_fields = set(vals)
+            for rec in self:
+                locked_fields = set()
+                if rec.state in ['in_progress', 'closed', 'invoiced', 'cancelled']:
+                    locked_fields |= self._LOCKED_FIELDS_FROM_IN_PROGRESS
+                if rec.state in ['invoiced', 'cancelled']:
+                    locked_fields |= self._LOCKED_FIELDS_IN_TERMINAL_STATES
+
+                blocked_fields = sorted(updated_fields & locked_fields)
+                if blocked_fields:
+                    labels = ', '.join(self._LOCKED_FIELD_LABELS[field_name] for field_name in blocked_fields)
+                    raise UserError(
+                        "Mission %s : les champs suivants sont verrouillés dans cet état : %s."
+                        % (rec._get_state_label(), labels)
+                    )
         return super(OrneInterimMission, self).write(vals)
+
+    def _normalize_description(self):
+        self.ensure_one()
+        return ' '.join((self.description or '').split())
+
+    def _format_mission_date(self, date_value):
+        return format_date(self.env, date_value) if date_value else "non renseignée"
+
+    def _get_state_label(self):
+        self.ensure_one()
+        return dict(self._fields['state'].selection).get(self.state, self.state)
+
+    def _check_qualification_readiness(self):
+        self.ensure_one()
+        if not self.partner_id:
+            raise UserError("Renseignez le client avant de qualifier la mission.")
+        if not self.date_start or not self.date_end:
+            raise UserError("Renseignez les dates de début et de fin avant de qualifier la mission.")
+        if self.date_end < self.date_start:
+            raise UserError("La date de fin doit être postérieure ou égale à la date de début.")
+        if self.expected_workers < 1:
+            raise UserError("Le nombre de personnes doit être au moins de 1.")
+        if len(self._normalize_description()) < 5:
+            raise UserError("Ajoutez une description plus précise avant de qualifier la mission.")
 
 
     # Méthodes de transition du workflow
@@ -89,14 +150,7 @@ class OrneInterimMission(models.Model):
         for rec in self:
             if rec.state != 'received':
                 raise UserError("Seules les missions à l'état 'Reçue' peuvent être qualifiées.")
-            if not rec.partner_id:
-                raise UserError("Le client est obligatoire pour qualifier la mission.")
-            if not rec.date_start or not rec.date_end:
-                raise UserError("Les dates de début et de fin sont obligatoires.")
-            if rec.date_end < rec.date_start:
-                raise UserError("La date de fin doit être postérieure à la date de début.")
-            if rec.expected_workers < 1:
-                raise UserError("Le nombre de personnes doit être au moins 1.")
+            rec._check_qualification_readiness()
             rec.with_context(allow_state_write=True).write({'state': 'qualified'})
 
     def action_propose(self):
@@ -115,21 +169,31 @@ class OrneInterimMission(models.Model):
         for rec in self:
             if rec.state != 'confirmed':
                 raise UserError("Seules les missions à l'état 'Confirmée' peuvent être démarrées.")
+            if not rec.date_start or not rec.date_end:
+                raise UserError("Renseignez les dates de début et de fin avant de démarrer la mission.")
             today = fields.Date.context_today(self)
+            if today < rec.date_start:
+                raise UserError(
+                    "Démarrage impossible avant le %s." % rec._format_mission_date(rec.date_start)
+                )
             if today > rec.date_end:
-                raise UserError("On ne peut pas démarrer une mission dont la date de fin est déjà dépassée.")
+                raise UserError(
+                    "Démarrage impossible : la mission était prévue jusqu'au %s."
+                    % rec._format_mission_date(rec.date_end)
+                )
             rec.with_context(allow_state_write=True).write({'state': 'in_progress'})
 
     def action_close(self):
         for rec in self:
             if rec.state != 'in_progress':
                 raise UserError("Seules les missions à l'état 'En cours' peuvent être clôturées.")
+            if not rec.date_end:
+                raise UserError("La date de fin est requise pour clôturer la mission.")
             today = fields.Date.context_today(self)
             if today < rec.date_end:
-                planned_end = rec.date_end.strftime('%d/%m/%Y') if rec.date_end else "non renseignée"
                 raise UserError(
                     "Impossible de clôturer une mission qui n'est pas encore terminée dans le temps. "
-                    "Date de fin prévue : %s." % planned_end
+                    "Date de fin prévue : %s." % rec._format_mission_date(rec.date_end)
                 )
             rec.with_context(allow_state_write=True).write({'state': 'closed'})
 
@@ -137,9 +201,14 @@ class OrneInterimMission(models.Model):
         for rec in self:
             if rec.state != 'closed':
                 raise UserError("Seules les missions à l'état 'Clôturée' peuvent être marquées comme facturées.")
+            if not rec.date_end:
+                raise UserError("La date de fin est requise pour facturer la mission.")
             today = fields.Date.context_today(self)
             if today < rec.date_end:
-                raise UserError("Impossible de facturer une mission qui n'est pas encore terminée dans le temps.")
+                raise UserError(
+                    "Impossible de facturer une mission qui n'est pas encore terminée. "
+                    "Date de fin prévue : %s." % rec._format_mission_date(rec.date_end)
+                )
             rec.with_context(allow_state_write=True).write({'state': 'invoiced'})
 
     def action_back_step(self):

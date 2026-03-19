@@ -86,55 +86,66 @@
                     </div>
                     <group string="Synthèse mission">
                         <group>
-                            <field name="partner_id"/>
-                            <field name="mission_type"/>
-                            <field name="expected_workers"/>
+                            <field name="partner_id"
+                                   attrs="{'readonly': [('state', 'in', ['in_progress', 'closed', 'invoiced', 'cancelled'])]}"/>
+                            <field name="mission_type"
+                                   attrs="{'readonly': [('state', 'in', ['in_progress', 'closed', 'invoiced', 'cancelled'])]}"/>
+                            <field name="expected_workers"
+                                   attrs="{'readonly': [('state', 'in', ['in_progress', 'closed', 'invoiced', 'cancelled'])]}"/>
                         </group>
                         <group>
-                            <field name="date_start"/>
-                            <field name="date_end" attrs="{'invisible': [('state', '=', 'in_progress')]}"/>
+                            <field name="date_start"
+                                   attrs="{'readonly': [('state', 'in', ['in_progress', 'closed', 'invoiced', 'cancelled'])]}"/>
+                            <field name="date_end"
+                                   attrs="{'readonly': [('state', 'in', ['in_progress', 'closed', 'invoiced', 'cancelled'])]}"/>
                             <field name="state" readonly="1"/>
                         </group>
                     </group>
                     <div class="alert alert-info" role="alert"
                          attrs="{'invisible': [('state', '!=', 'in_progress')]}">
-                        <strong>Date de fin à surveiller :</strong>
-                        <field name="date_end" nolabel="1" readonly="1" class="oe_inline"/>
+                        <span><strong>Date de fin à surveiller :</strong></span>
+                        <span class="oe_inline" style="margin-left: 6px;">
+                            <field name="date_end" nolabel="1" readonly="1" class="oe_inline"/>
+                        </span>
                     </div>
                     <group string="Description de la mission" col="1">
                         <field name="description" nolabel="1"
+                               attrs="{'readonly': [('state', 'in', ['in_progress', 'closed', 'invoiced', 'cancelled'])]}"
                                placeholder="Précisez le besoin client, le contexte et les contraintes éventuelles..."/>
                     </group>
                     <notebook>
                         <page string="Demande">
-                            <group string="Contexte de la demande">
-                                <group>
-                                    <field name="partner_id"/>
-                                    <field name="mission_type"/>
-                                    <field name="expected_workers"/>
-                                </group>
-                                <group>
-                                    <field name="state" readonly="1"/>
-                                    <field name="cancel_reason" attrs="{'invisible': [('state', '!=', 'cancelled')]}"/>
-                                </group>
+                            <group col="1">
+                                <div class="text-muted"
+                                     attrs="{'invisible': [('state', '=', 'cancelled')]}">
+                                    La synthèse et la description ci-dessus portent déjà les éléments métier essentiels de la demande.
+                                </div>
+                                <field name="cancel_reason"
+                                       placeholder="Précisez brièvement pourquoi la mission a été annulée..."
+                                       attrs="{'invisible': [('state', '!=', 'cancelled')], 'readonly': [('state', '!=', 'cancelled')]}"/>
                             </group>
                         </page>
                         <page string="Planification">
                             <group string="Période de mission">
                                 <group>
-                                    <field name="date_start"/>
-                                    <field name="date_end"/>
+                                    <field name="date_start"
+                                           attrs="{'readonly': [('state', 'in', ['in_progress', 'closed', 'invoiced', 'cancelled'])]}"/>
+                                    <field name="date_end"
+                                           attrs="{'readonly': [('state', 'in', ['in_progress', 'closed', 'invoiced', 'cancelled'])]}"/>
                                 </group>
                                 <group>
-                                    <field name="duration_days" string="Durée calculée (jours)" readonly="1"/>
-                                    <div class="o_form_label text-muted">Calcul automatique à partir des dates de début et de fin.</div>
+                                    <field name="duration_days" string="Durée calculée (jours calendaires)" readonly="1"/>
+                                    <div class="text-muted">
+                                        Calcul automatique entre la date de début et la date de fin, jour de fin inclus.
+                                    </div>
                                 </group>
                             </group>
                         </page>
                         <page string="Facturation">
                             <group>
                                 <group>
-                                    <field name="hourly_rate" placeholder="0.00"/>
+                                    <field name="hourly_rate" placeholder="0.00"
+                                           attrs="{'readonly': [('state', 'in', ['invoiced', 'cancelled'])]}"/>
                                 </group>
                             </group>
                         </page>
